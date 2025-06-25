@@ -1,0 +1,40 @@
+{
+  "bones": [
+    {
+      "id": "shoulders",
+      "parent": null,
+      "length": 0,
+      "angle": 0
+    },
+    {
+      "id": "pelvis",
+      "parent": "shoulders",
+      "length": 40,
+      "angle": -90
+    },
+    {
+      "id": "front_leg",
+      "parent": "shoulders",
+      "length": 45,
+      "angle": 140
+    },
+    {
+      "id": "neck",
+      "parent": "shoulders",
+      "length": 30,
+      "angle": 40
+    },
+    {
+      "id": "rear_leg",
+      "parent": "pelvis",
+      "length": 45,
+      "angle": -60
+    },
+    {
+      "id": "head",
+      "parent": "neck",
+      "length": 20,
+      "angle": 45
+    }
+  ]
+}

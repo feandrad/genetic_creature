@@ -1,0 +1,94 @@
+{
+  "bones": [
+    {
+      "id": "shoulders",
+      "parent": null,
+      "length": 0,
+      "angle": 0
+    },
+    {
+      "id": "spine",
+      "parent": "shoulders",
+      "length": 50,
+      "angle": -100
+    },
+    {
+      "id": "pelvis",
+      "parent": "spine",
+      "length": 30,
+      "angle": -20
+    },
+    {
+      "id": "neck",
+      "parent": "shoulders",
+      "length": 35,
+      "angle": 40
+    },
+    {
+      "id": "head",
+      "parent": "neck",
+      "length": 25,
+      "angle": 3
+    },
+    {
+      "id": "head_tip",
+      "parent": "head",
+      "length": 30,
+      "angle": 50
+    },
+    {
+      "id": "front_leg",
+      "parent": "shoulders",
+      "length": 40,
+      "angle": 170
+    },
+    {
+      "id": "front_feet",
+      "parent": "front_leg",
+      "length": 45,
+      "angle": -30
+    },
+    {
+      "id": "wing",
+      "parent": "shoulders",
+      "length": 60,
+      "angle": -10
+    },
+    {
+      "id": "wing_tip",
+      "parent": "wing",
+      "length": 80,
+      "angle": -95
+    },
+    {
+      "id": "tail1",
+      "parent": "pelvis",
+      "length": 50,
+      "angle": 0
+    },
+    {
+      "id": "tail2",
+      "parent": "tail1",
+      "length": 50,
+      "angle": 20
+    },
+    {
+      "id": "tail_tip",
+      "parent": "tail2",
+      "length": 40,
+      "angle": 15
+    },
+    {
+      "id": "rear_leg",
+      "parent": "pelvis",
+      "length": 30,
+      "angle": -95
+    },
+    {
+      "id": "rear_feet",
+      "parent": "rear_leg",
+      "length": 40,
+      "angle": 85
+    }
+  ]
+}
