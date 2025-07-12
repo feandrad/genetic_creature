@@ -4,6 +4,8 @@ let bones = [];          // array final de ossos
 let positions = {};      // mapa id → p5.Vector
 let currentCreature;     // The currently loaded Creature object
 
+const GROUND_OFFSET = 15;
+
 let generationSelect;
 let resetButton;
 let physicsEngine;
@@ -58,7 +60,7 @@ function onError() {
 function setup() {
     createCanvas(windowWidth, windowHeight - 120); // Subtract 80px for header/dropdown
     angleMode(DEGREES);
-    physicsEngine = new PhysicsEngine(6, height - 5); // Ground at 5px from bottom
+    physicsEngine = new PhysicsEngine(6, height - GROUND_OFFSET); // Ground at height - GROUND_OFFSET
     loop();              // só desenha quando chamarmos redraw()
 
     resetButton = select('#reset-button');
@@ -66,8 +68,8 @@ function setup() {
 }
 
 function windowResized() {
-    resizeCanvas(windowWidth, windowHeight - 80);
-    physicsEngine.groundY = height - 5; // Update ground position on resize
+    resizeCanvas(windowWidth, windowHeight - 120);
+    physicsEngine.groundY = height - GROUND_OFFSET; // Update ground position on resize
 }
 
 function resetSimulation() {
@@ -95,7 +97,7 @@ function draw() {
     // Draw ground
     stroke(0);
     strokeWeight(2);
-    line(0, height - 20, width, height - 5);
+    line(0, height - GROUND_OFFSET, width, height - GROUND_OFFSET);
 
     if (!bones.length) {
         textAlign(CENTER, CENTER);
@@ -110,7 +112,7 @@ function draw() {
     drawJoints();
     drawCenterOfGravity();
     drawNeuralNetwork();
-    //updateCreatureMovement();
+    updateCreatureMovement();
 }
 
 function updateCreatureMovement() {
