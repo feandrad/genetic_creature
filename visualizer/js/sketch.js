@@ -56,13 +56,18 @@ function onError() {
 }
 
 function setup() {
-    createCanvas(800, 600);
+    createCanvas(windowWidth, windowHeight - 120); // Subtract 80px for header/dropdown
     angleMode(DEGREES);
-    physicsEngine = new PhysicsEngine(6, 500); // Ground at y = 500 (increased gravity)
+    physicsEngine = new PhysicsEngine(6, height - 5); // Ground at 5px from bottom
     loop();              // só desenha quando chamarmos redraw()
 
     resetButton = select('#reset-button');
     resetButton.mousePressed(resetSimulation);
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight - 80);
+    physicsEngine.groundY = height - 5; // Update ground position on resize
 }
 
 function resetSimulation() {
@@ -90,7 +95,7 @@ function draw() {
     // Draw ground
     stroke(0);
     strokeWeight(2);
-    line(0, 500, width, 500);
+    line(0, height - 5, width, height - 5);
 
     if (!bones.length) {
         textAlign(CENTER, CENTER);
@@ -115,8 +120,13 @@ function drawNeuralNetwork() {
     const layerSpacing = 100;
     const nodeSpacing = 20;
 
-    const startX = 50;
-    const startY = 50;
+    // Calculate dynamic spacing based on number of nodes
+    const maxNodes = Math.max(brain.inputNodes, brain.hiddenNodes, brain.outputNodes);
+    const totalHeight = maxNodes * nodeSpacing;
+    const startYOffset = (height - totalHeight) / 2; // Center vertically
+
+    const startX = width - 250; // Position from right edge
+    const startY = startYOffset;
 
     // Calculate positions for input nodes
     const inputNodesY = [];
