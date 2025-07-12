@@ -117,33 +117,41 @@ function drawNeuralNetwork() {
 
     const brain = currentCreature.brain;
     const nodeSize = 10;
-    const layerSpacing = 100;
-    const nodeSpacing = 20;
+    const layerSpacing = 80; // Horizontal spacing between layers
+    const nodeSpacing = 15;  // Vertical spacing between nodes within a layer
 
-    // Calculate dynamic spacing based on number of nodes
-    const maxNodes = Math.max(brain.inputNodes, brain.hiddenNodes, brain.outputNodes);
-    const totalHeight = maxNodes * nodeSpacing;
-    const startYOffset = (height - totalHeight) / 2; // Center vertically
+    const margin = 30; // Increased margin from the top and right edges
 
-    const startX = width - 250; // Position from right edge
-    const startY = startYOffset;
+    // Calculate startX for top-right alignment
+    const brainWidth = 2 * layerSpacing + 3 * nodeSize; // Total width of the brain visualization
+    const startX = width - brainWidth - margin;
+
+    // Calculate the maximum number of nodes in any layer to determine overall vertical space needed
+    const maxNodesInAnyLayer = Math.max(brain.inputNodes, brain.hiddenNodes, brain.outputNodes);
+
+    // Calculate the starting Y position for each layer to ensure vertical centering
+    // Each layer will be centered within the space defined by maxNodesInAnyLayer
+    const inputLayerStartY = margin + (maxNodesInAnyLayer - brain.inputNodes) * nodeSpacing / 2;
+    const hiddenLayerStartY = margin + (maxNodesInAnyLayer - brain.hiddenNodes) * nodeSpacing / 2;
+    const outputLayerStartY = margin + (maxNodesInAnyLayer - brain.outputNodes) * nodeSpacing / 2;
+
 
     // Calculate positions for input nodes
     const inputNodesY = [];
     for (let i = 0; i < brain.inputNodes; i++) {
-        inputNodesY.push(startY + i * nodeSpacing);
+        inputNodesY.push(inputLayerStartY + i * nodeSpacing);
     }
 
     // Calculate positions for hidden nodes
     const hiddenNodesY = [];
     for (let i = 0; i < brain.hiddenNodes; i++) {
-        hiddenNodesY.push(startY + i * nodeSpacing + (brain.inputNodes - brain.hiddenNodes) * nodeSpacing / 2);
+        hiddenNodesY.push(hiddenLayerStartY + i * nodeSpacing);
     }
 
     // Calculate positions for output nodes
     const outputNodesY = [];
     for (let i = 0; i < brain.outputNodes; i++) {
-        outputNodesY.push(startY + i * nodeSpacing + (brain.inputNodes - brain.outputNodes) * nodeSpacing / 2);
+        outputNodesY.push(outputLayerStartY + i * nodeSpacing);
     }
 
     // Draw connections (weights)
