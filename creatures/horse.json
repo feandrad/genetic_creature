@@ -24,7 +24,7 @@
       "length": 45,
       "angle": 140,
       "strength": 1.0,
-      "mov_angle": 0.0,
+      "mov_angle": 30.0,
       "weight": 1.0
     },
     {
@@ -33,7 +33,7 @@
       "length": 30,
       "angle": 40,
       "strength": 1.0,
-      "mov_angle": 0.0,
+      "mov_angle": 30.0,
       "weight": 1.0
     },
     {
@@ -42,7 +42,7 @@
       "length": 45,
       "angle": -60,
       "strength": 1.0,
-      "mov_angle": 0.0,
+      "mov_angle": 30.0,
       "weight": 1.0
     },
     {

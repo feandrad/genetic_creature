@@ -95,7 +95,7 @@ function draw() {
     // Draw ground
     stroke(0);
     strokeWeight(2);
-    line(0, height - 5, width, height - 5);
+    line(0, height - 20, width, height - 5);
 
     if (!bones.length) {
         textAlign(CENTER, CENTER);
@@ -110,6 +110,56 @@ function draw() {
     drawJoints();
     drawCenterOfGravity();
     drawNeuralNetwork();
+    //updateCreatureMovement();
+}
+
+function updateCreatureMovement() {
+    if (!currentCreature || !currentCreature.brain) return;
+
+    const brain = currentCreature.brain;
+    const inputs = [];
+
+    // Input 1: Root bone Y position (normalized)
+    const root = bones.find(b => b.parent === null);
+    if (root && positions[root.id]) {
+        inputs.push(map(positions[root.id].y, 0, height, -1, 1));
+    } else {
+        inputs.push(0);
+    }
+
+    // Input 2: Center of Gravity X position (normalized)
+    const cog = calculateCenterOfGravity();
+    inputs.push(map(cog.x, 0, width, -1, 1));
+
+    // Input 3: Center of Gravity Y position (normalized)
+    inputs.push(map(cog.y, 0, height, -1, 1));
+
+    // Input 4-N: Bone angles (normalized)
+    bones.forEach(bone => {
+        // For now, we'll just use the initial angle as a placeholder input
+        // In a real simulation, you'd calculate current angle from positions
+        inputs.push(map(bone.angle || 0, -180, 180, -1, 1));
+    });
+
+    // Ensure inputs match the brain's expected input nodes
+    while (inputs.length < brain.inputNodes) {
+        inputs.push(0); // Pad with zeros if not enough inputs
+    }
+    if (inputs.length > brain.inputNodes) {
+        inputs.splice(brain.inputNodes); // Trim if too many inputs
+    }
+
+    const outputs = brain.predict(inputs);
+
+    // Apply outputs to bone current_target_deviation
+    for (let i = 0; i < bones.length; i++) {
+        if (i < outputs.length) {
+            // Map output (0-1) to a normalized range (-1 to 1)
+            const normalizedOutput = map(outputs[i], 0, 1, -1, 1);
+            // Calculate the desired deviation based on the bone's mov_angle property
+            bones[i].current_target_deviation = normalizedOutput * (bones[i].mov_angle || 0);
+        }
+    }
 }
 
 function drawNeuralNetwork() {
@@ -275,8 +325,6 @@ function initializeBonePositions() {
             }
         });
     }
-
-    
 
     console.log("Final positions:", positions);
 }

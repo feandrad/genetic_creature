@@ -14,6 +14,7 @@ class NEAT {
     }
 
     init(initialCreature) {
+        this.inputNodes = 3 + initialCreature.bones.length; // 3 for root/CoG + bones.length for angles
         this.outputNodes = initialCreature.bones.length; // One output for each bone's mov_angle
         for (let i = 0; i < this.populationSize; i++) {
             const brain = new NeuralNetwork(this.inputNodes, this.hiddenNodes, this.outputNodes);
