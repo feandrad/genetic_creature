@@ -4,37 +4,55 @@
       "id": "shoulders",
       "parent": null,
       "length": 0,
-      "angle": 0
+      "angle": 0,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "pelvis",
       "parent": "shoulders",
       "length": 40,
-      "angle": -90
+      "angle": -90,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "front_leg",
       "parent": "shoulders",
       "length": 45,
-      "angle": 140
+      "angle": 140,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "neck",
       "parent": "shoulders",
       "length": 30,
-      "angle": 40
+      "angle": 40,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "rear_leg",
       "parent": "pelvis",
       "length": 45,
-      "angle": -60
+      "angle": -60,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "head",
       "parent": "neck",
       "length": 20,
-      "angle": 45
+      "angle": 45,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     }
   ]
 }

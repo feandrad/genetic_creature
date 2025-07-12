@@ -4,91 +4,136 @@
       "id": "shoulders",
       "parent": null,
       "length": 0,
-      "angle": 0
+      "angle": 0,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "spine",
       "parent": "shoulders",
       "length": 50,
-      "angle": -100
+      "angle": -100,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "pelvis",
       "parent": "spine",
       "length": 30,
-      "angle": -20
+      "angle": -20,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "neck",
       "parent": "shoulders",
       "length": 35,
-      "angle": 40
+      "angle": 40,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "head",
       "parent": "neck",
       "length": 25,
-      "angle": 3
+      "angle": 3,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "head_tip",
       "parent": "head",
       "length": 30,
-      "angle": 50
+      "angle": 50,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "front_leg",
       "parent": "shoulders",
       "length": 40,
-      "angle": 170
+      "angle": 170,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "front_feet",
       "parent": "front_leg",
       "length": 45,
-      "angle": -30
+      "angle": -30,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "wing",
       "parent": "shoulders",
       "length": 60,
-      "angle": -10
+      "angle": -10,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "wing_tip",
       "parent": "wing",
       "length": 80,
-      "angle": -95
+      "angle": -95,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "tail1",
       "parent": "pelvis",
       "length": 50,
-      "angle": 0
+      "angle": 0,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "tail2",
       "parent": "tail1",
       "length": 50,
-      "angle": 20
+      "angle": 20,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "tail_tip",
       "parent": "tail2",
       "length": 40,
-      "angle": 15
+      "angle": 15,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "rear_leg",
       "parent": "pelvis",
       "length": 30,
-      "angle": -95
+      "angle": -95,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "rear_feet",
       "parent": "rear_leg",
       "length": 40,
-      "angle": 85
+      "angle": 85,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     }
   ]
 }

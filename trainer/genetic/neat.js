@@ -1,5 +1,6 @@
 
 const Creature = require('../../shared/models/creature.js');
+const NeuralNetwork = require('../../shared/models/neural_network.js');
 
 class NEAT {
     constructor(populationSize, mutationRate, crossoverRate) {
@@ -7,11 +8,18 @@ class NEAT {
         this.mutationRate = mutationRate;
         this.crossoverRate = crossoverRate;
         this.population = [];
+        this.inputNodes = 5; // Placeholder: CoG x, CoG y, root angle, root angular velocity, ground contact
+        this.hiddenNodes = 10;
+        this.outputNodes = 0; // Will be set based on creature bones
     }
 
     init(initialCreature) {
+        this.outputNodes = initialCreature.bones.length; // One output for each bone's mov_angle
         for (let i = 0; i < this.populationSize; i++) {
-            this.population.push(initialCreature.clone());
+            const brain = new NeuralNetwork(this.inputNodes, this.hiddenNodes, this.outputNodes);
+            const newCreature = initialCreature.clone();
+            newCreature.brain = brain;
+            this.population.push(newCreature);
         }
     }
 
@@ -53,7 +61,7 @@ class NEAT {
             const bone2 = parent2.bones[i];
             childBones.push(Math.random() < 0.5 ? bone1 : bone2);
         }
-        return new Creature(childBones);
+        return new Creature(childBones, Math.random() < 0.5 ? parent1.brain.clone() : parent2.brain.clone());
     }
 
     mutate(creature) {
@@ -61,6 +69,9 @@ class NEAT {
             const randomIndex = Math.floor(Math.random() * creature.bones.length);
             const randomBone = creature.bones[randomIndex];
             randomBone.angle += (Math.random() - 0.5) * 10;
+        }
+        if (creature.brain) {
+            creature.brain.mutate(this.mutationRate);
         }
     }
 }
