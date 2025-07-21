@@ -1,11 +1,18 @@
 
 class PhysicsEngine {
-    constructor(gravity, groundY) {
+    constructor(gravity, groundY, horizontalDamping = 0.5) {
+        this.horizontalDamping = horizontalDamping;
         this.gravity = gravity;
         this.groundY = groundY;
+        this._previousPositions = {};
     }
 
     update(positions, bones) {
+        // Store current positions as previous positions for the next frame
+        for (const id in positions) {
+            this._previousPositions[id] = { x: positions[id].x, y: positions[id].y };
+        }
+
         for (const id in positions) {
             const pos = positions[id];
             // Apply gravity
@@ -13,8 +20,23 @@ class PhysicsEngine {
 
             // Ground collision detection and resolution (without joint radius)
             if (pos.y > this.groundY) {
-                pos.y = this.groundY; // Clamp position at ground level
-                // No velocity consideration for now, just position clamping
+                // Apply upward force based on bone strength
+                const bone = bones.find(b => positions[b.id] === pos); // Find the bone associated with this position
+                if (bone) {
+                    pos.y -= bone.strength * 0.2; // Apply upward force
+                }
+                pos.y = Math.min(pos.y, this.groundY); // Clamp position at ground level, but allow it to be pushed up
+
+                // Apply horizontal damping (friction)
+                const prevPos = this._previousPositions[id];
+                if (prevPos) {
+                    let dx = pos.x - prevPos.x;
+                    // Apply static friction: if horizontal movement is very small, stop it completely
+                    if (Math.abs(dx) < this.horizontalDamping) {
+                        dx = 0;
+                    }
+                    pos.x = prevPos.x + dx;
+                }
             }
         }
 
@@ -53,7 +75,12 @@ class PhysicsEngine {
                     const currentAngle = this._toDegrees(Math.atan2(currentDiffX, -currentDiffY));
                     
                     // Calculate the target angle based on the bone's original angle and the neural network's output
-                    const targetAngle = (bone.angle || 0) + bone.current_target_deviation;
+                    let targetAngle = (bone.angle || 0) + bone.current_target_deviation;
+
+                    // Clamp targetAngle within mov_angle limits
+                    const minAngle = (bone.angle || 0) - (bone.mov_angle || 0);
+                    const maxAngle = (bone.angle || 0) + (bone.mov_angle || 0);
+                    targetAngle = Math.max(minAngle, Math.min(maxAngle, targetAngle));
 
                     let angleDifference = targetAngle - currentAngle;
 

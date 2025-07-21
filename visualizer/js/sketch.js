@@ -112,7 +112,7 @@ function draw() {
     drawJoints();
     drawCenterOfGravity();
     drawNeuralNetwork();
-    updateCreatureMovement();
+    //updateCreatureMovement();
 }
 
 function updateCreatureMovement() {
