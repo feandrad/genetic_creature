@@ -112,7 +112,7 @@ function draw() {
     drawJoints();
     drawCenterOfGravity();
     drawNeuralNetwork();
-    //updateCreatureMovement();
+    updateCreatureMovement();
 }
 
 function updateCreatureMovement() {
@@ -151,7 +151,7 @@ function updateCreatureMovement() {
         inputs.splice(brain.inputNodes); // Trim if too many inputs
     }
 
-    const outputs = brain.predict(inputs);
+    const outputs = brain.feedForward(inputs);
 
     // Apply outputs to bone current_target_deviation
     for (let i = 0; i < bones.length; i++) {

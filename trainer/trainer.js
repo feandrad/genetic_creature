@@ -14,6 +14,7 @@ class Trainer {
         this.neat.init(initialCreature);
 
         for (let i = 0; i < generations; i++) {
+            console.log(`[Trainer] Evolving generation ${i + 1}/${generations}...`);
             this.neat.evolve();
             this.saveBestCreature(i);
         }

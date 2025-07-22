@@ -102,7 +102,7 @@ class NeuralNetwork {
         return arr;
     }
 
-    predict(input_array) {
+    feedForward(input_array) {
         // Input to Hidden
         let inputs = this.arrayToMatrix(input_array);
         let hidden = this.multiply(this.weights_ih, inputs);
