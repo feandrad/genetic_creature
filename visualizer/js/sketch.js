@@ -295,6 +295,7 @@ function initializeBonePositions() {
     // Set the root bone's initial position at the center of the canvas
     positions[root.id] = createVector(width / 2, height / 2);
     angles[root.id] = root.angle || 0;
+    root.initialAngle = root.angle || 0; // Set initial global angle for the root
     console.log(`Root bone ${root.id} at (${positions[root.id].x}, ${positions[root.id].y})`);
 
     // Now calculate the children in order
@@ -309,6 +310,7 @@ function initializeBonePositions() {
 
         const angle = (bone.angle || 0) + parentAngle;
         angles[id] = angle;
+        bone.initialAngle = angle; // Store the calculated global angle
 
         const len = bone.length || 0;
         const dx = sin(angle) * len;

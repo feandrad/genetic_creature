@@ -13,35 +13,32 @@ class PhysicsEngine {
             this._previousPositions[id] = { x: positions[id].x, y: positions[id].y };
         }
 
+        // Apply gravity to all points
+        for (const id in positions) {
+            positions[id].y += this.gravity;
+        }
+
+        // Iteratively solve constraints
+        for (let i = 0; i < 15; i++) {
+            this.satisfyConstraints(positions, bones);
+            this.enforceGroundConstraint(positions);
+        }
+    }
+
+    enforceGroundConstraint(positions) {
         for (const id in positions) {
             const pos = positions[id];
-            // Apply gravity
-            pos.y += this.gravity;
-
-            // Ground collision detection and resolution (without joint radius)
             if (pos.y > this.groundY) {
-                // Apply upward force based on bone strength
-                const bone = bones.find(b => positions[b.id] === pos); // Find the bone associated with this position
-                if (bone) {
-                    pos.y -= bone.strength * 0.2; // Apply upward force
-                }
-                pos.y = Math.min(pos.y, this.groundY); // Clamp position at ground level, but allow it to be pushed up
+                pos.y = this.groundY; // Enforce ground as a hard constraint
 
                 // Apply horizontal damping (friction)
                 const prevPos = this._previousPositions[id];
                 if (prevPos) {
-                    let dx = pos.x - prevPos.x;
-                    // Apply static friction: if horizontal movement is very small, stop it completely
-                    if (Math.abs(dx) < this.horizontalDamping) {
-                        dx = 0;
-                    }
-                    pos.x = prevPos.x + dx;
+                    const vx = pos.x - prevPos.x;
+                    // Dampen velocity
+                    pos.x = prevPos.x + vx * this.horizontalDamping;
                 }
             }
-        }
-
-        for (let i = 0; i < 3; i++) {
-            this.satisfyConstraints(positions, bones);
         }
     }
 
@@ -52,56 +49,78 @@ class PhysicsEngine {
             const parentPos = positions[bone.parent];
             const childPos = positions[bone.id];
 
+            // 1. Satisfy length constraint
             const diff = { x: childPos.x - parentPos.x, y: childPos.y - parentPos.y };
             const distance = Math.sqrt(diff.x * diff.x + diff.y * diff.y);
-            const difference = (bone.length - distance) / distance;
+            if (distance > 0) {
+                const difference = (bone.length - distance) / distance;
+                const translateX = diff.x * difference * 0.5;
+                const translateY = diff.y * difference * 0.5;
 
-            const translateX = diff.x * difference * 0.5;
-            const translateY = diff.y * difference * 0.5;
+                childPos.x += translateX;
+                childPos.y += translateY;
+                parentPos.x -= translateX;
+                parentPos.y -= translateY;
+            }
 
-            childPos.x += translateX;
-            childPos.y += translateY;
-            parentPos.x -= translateX;
-            parentPos.y -= translateY;
+            // 2. Enforce rigid angular constraints
+            const currentDiff = { x: childPos.x - parentPos.x, y: childPos.y - parentPos.y };
+            const currentAngle = this._toDegrees(Math.atan2(currentDiff.x, -currentDiff.y));
 
-            // Apply angular constraint based on current_target_deviation
+            const baseAngle = bone.initialAngle !== undefined ? bone.initialAngle : bone.angle;
+            const minAngle = baseAngle - (bone.mov_angle || 0);
+            const maxAngle = baseAngle + (bone.mov_angle || 0);
+
+            let clampedAngle = currentAngle;
+            let needsCorrection = false;
+
+            // Normalize angles for correct comparison
+            let normalizedCurrent = (currentAngle % 360 + 360) % 360;
+            let normalizedMin = (minAngle % 360 + 360) % 360;
+            let normalizedMax = (maxAngle % 360 + 360) % 360;
+
+            if (normalizedMin > normalizedMax) { // e.g., min 350, max 10
+                if (normalizedCurrent > normalizedMax && normalizedCurrent < normalizedMin) {
+                    needsCorrection = true;
+                    clampedAngle = Math.abs(normalizedCurrent - normalizedMin) < Math.abs(normalizedCurrent - normalizedMax) ? minAngle : maxAngle;
+                }
+            } else {
+                if (normalizedCurrent < normalizedMin || normalizedCurrent > normalizedMax) {
+                    needsCorrection = true;
+                    clampedAngle = Math.max(minAngle, Math.min(maxAngle, currentAngle));
+                }
+            }
+
+            if (needsCorrection) {
+                const angleRad = this._toRadians(clampedAngle);
+                const newX = parentPos.x + Math.sin(angleRad) * bone.length;
+                const newY = parentPos.y - Math.cos(angleRad) * bone.length;
+                childPos.x = newX;
+                childPos.y = newY;
+            }
+
+            // 3. Apply brain-driven movement within constraints
             if (bone.current_target_deviation !== undefined) {
-                const currentDiffX = childPos.x - parentPos.x;
-                const currentDiffY = childPos.y - parentPos.y;
-                const currentDistance = Math.sqrt(currentDiffX * currentDiffX + currentDiffY * currentDiffY);
+                let targetAngle = baseAngle + bone.current_target_deviation;
+                // Clamp the target angle to the allowed range
+                targetAngle = Math.max(minAngle, Math.min(maxAngle, targetAngle));
 
-                if (currentDistance > 0) {
-                    // Calculate current angle of the bone
-                    const currentAngle = this._toDegrees(Math.atan2(currentDiffX, -currentDiffY));
-                    
-                    // Calculate the target angle based on the bone's original angle and the neural network's output
-                    let targetAngle = (bone.angle || 0) + bone.current_target_deviation;
+                let angleDifference = targetAngle - currentAngle;
+                while (angleDifference > 180) angleDifference -= 360;
+                while (angleDifference < -180) angleDifference += 360;
 
-                    // Clamp targetAngle within mov_angle limits
-                    const minAngle = (bone.angle || 0) - (bone.mov_angle || 0);
-                    const maxAngle = (bone.angle || 0) + (bone.mov_angle || 0);
-                    targetAngle = Math.max(minAngle, Math.min(maxAngle, targetAngle));
+                const correctionStrength = 0.1 * bone.strength;
+                const rotationAmount = this._toRadians(angleDifference * correctionStrength);
 
-                    let angleDifference = targetAngle - currentAngle;
+                const cosRot = Math.cos(rotationAmount);
+                const sinRot = Math.sin(rotationAmount);
 
-                    // Normalize angleDifference to be between -180 and 180
-                    while (angleDifference > 180) angleDifference -= 360;
-                    while (angleDifference < -180) angleDifference += 360;
+                const rotatedDiffX = currentDiff.x * cosRot - currentDiff.y * sinRot;
+                const rotatedDiffY = currentDiff.x * sinRot + currentDiff.y * cosRot;
 
-                    const angularCorrectionStrength = 0.05; // How strongly to correct the angle
-                    const rotationAmount = this._toRadians(angleDifference * angularCorrectionStrength);
-
-                    // Rotate the child position around the parent position
-                    const cosRot = Math.cos(rotationAmount);
-                    const sinRot = Math.sin(rotationAmount);
-
-                    const rotatedDiffX = currentDiffX * cosRot - currentDiffY * sinRot;
-                    const rotatedDiffY = currentDiffX * sinRot + currentDiffY * cosRot;
-
-                    // Re-normalize to bone.length after rotation to maintain length
-                    const newDistance = Math.sqrt(rotatedDiffX * rotatedDiffX + rotatedDiffY * rotatedDiffY);
+                const newDistance = Math.sqrt(rotatedDiffX * rotatedDiffX + rotatedDiffY * rotatedDiffY);
+                if (newDistance > 0) {
                     const scaleFactor = bone.length / newDistance;
-
                     childPos.x = parentPos.x + rotatedDiffX * scaleFactor;
                     childPos.y = parentPos.y + rotatedDiffY * scaleFactor;
                 }
@@ -120,4 +139,8 @@ class PhysicsEngine {
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = PhysicsEngine;
+}
+
+if (typeof window !== 'undefined') {
+    window.PhysicsEngine = PhysicsEngine;
 }

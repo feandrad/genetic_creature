@@ -1,6 +1,7 @@
 
 const Creature = require('../../shared/models/creature.js');
 const NeuralNetwork = require('../../shared/models/neural_network.js');
+const Simulator = require('../simulation/simulator.js');
 
 class NEAT {
     constructor(populationSize, mutationRate, crossoverRate) {
@@ -8,6 +9,7 @@ class NEAT {
         this.mutationRate = mutationRate;
         this.crossoverRate = crossoverRate;
         this.population = [];
+        this.simulator = new Simulator(1000);
         this.inputNodes = 5; // Placeholder: CoG x, CoG y, root angle, root angular velocity, ground contact
         this.hiddenNodes = 10;
         this.outputNodes = 0; // Will be set based on creature bones
@@ -25,6 +27,11 @@ class NEAT {
     }
 
     evolve() {
+        // Evaluate the fitness of each creature
+        this.population.forEach(creature => {
+            this.simulator.simulate(creature);
+        });
+
         // Select the best creatures from the population
         const bestCreatures = this.selectBest();
 
