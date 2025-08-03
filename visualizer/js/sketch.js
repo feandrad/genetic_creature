@@ -28,9 +28,10 @@ function populateGenerationSelect(files) {
         generationSelect.option(`Generation ${generation}`, file);
     }
     generationSelect.changed(onGenerationChange);
+    generationSelect.option = 0;
     // Load the first creature by default
     if (files.length > 0) {
-        loadJSON(`data/${files[0]}`, onLoaded, onError);
+        onGenerationChange()
     }
 }
 
@@ -43,12 +44,6 @@ function onGenerationChange() {
 function onLoaded(raw) {
     currentCreature = Creature.fromJson(raw);
     bones = currentCreature.bones;
-    // Initialize positions for physics engine
-    positions = {};
-    const root = bones.find(b => b.parent === null);
-    if (root) {
-        positions[root.id] = createVector(0, 0);
-    }
     initializeBonePositions();
     redraw();              // força desenhar quando o JSON chegou
 }
@@ -279,13 +274,10 @@ function drawCenterOfGravity() {
     circle(cog.x, cog.y, 15); // Draw a blue circle for CoG
 }
 
-/* ---------- utilidades ---------- */
-
 function initializeBonePositions() {
     positions = {};
     const angles = {};
 
-    // Primeiro, encontre a raiz
     const root = bones.find(b => b.parent === null);
     if (!root) {
         console.error("No root bone found!");
@@ -320,17 +312,13 @@ function initializeBonePositions() {
         console.log(`Bone ${id} at (${positions[id].x}, ${positions[id].y}) from parent ${parentId}`);
     }
 
-    // Ensure topological order (simple for now)
-    // This loop might need to run multiple times for complex hierarchies
-    for (let i = 0; i < bones.length * 2; i++) { // Iterate multiple times to ensure all bones are processed
+    for (let i = 0; i < bones.length * 2; i++) {
         bones.forEach(b => {
             if (b.parent && positions[b.parent] && !positions[b.id]) {
                 computePos(b.id);
             }
         });
     }
-
-    console.log("Final positions:", positions);
 }
 
 function drawBones() {
