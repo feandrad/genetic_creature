@@ -22,6 +22,14 @@ function onCreatureListLoaded(creatureFiles) {
 
 function populateGenerationSelect(files) {
     generationSelect = select('#generation-select');
+
+    // Sort files numerically based on the generation number in the filename
+    files.sort((a, b) => {
+        const genA = parseInt(a.split('_')[1].split('.')[0], 10);
+        const genB = parseInt(b.split('_')[1].split('.')[0], 10);
+        return genA - genB;
+    });
+
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const generation = file.split('_')[1].split('.')[0];
