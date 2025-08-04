@@ -1,63 +1,71 @@
-# Genetic Creature Walking Training Demo
+# Criaturas Robóticas: Um Simulador de Evolução Genética
 
-A fascinating demonstration of genetic algorithms applied to creature locomotion, featuring skeletal creatures that learn to walk through evolutionary processes.
+Este projeto simula a evolução de criaturas robóticas em um ambiente 2D. O objetivo principal é que essas criaturas, compostas por um esqueleto com juntas motorizadas (servo motores), aprendam a se levantar e a manter o equilíbrio, lutando contra a gravidade.
 
-## 🐉 Overview
+O sucesso de cada robô é medido pela sua capacidade de elevar seu centro de gravidade. Um algoritmo genético otimiza a rede neural que controla os servo motores, buscando a estratégia de movimento mais eficiente para alcançar a maior altura possível.
 
-This project showcases how genetic algorithms can be used to evolve walking behaviors for virtual creatures. The demo includes:
+## Funcionalidades
 
-- **Skeletal Creature System**: Modular bone-based creatures (dragons, horses, etc.)
-- **Genetic Algorithm Training**: Evolutionary optimization of walking patterns
-- **Real-time Visualizer**: Interactive 3D visualization using p5.js
-- **Physics Simulation**: Realistic physics for creature movement
+- **Evolução por Algoritmo Genético**: Utiliza o algoritmo NEAT para evoluir as redes neurais que controlam os robôs.
+- **Simulação de Robôs 2D**: As criaturas são esqueletos 2D com juntas que funcionam como servo motores.
+- **Fitness Baseado no Centro de Gravidade**: A aptidão é calculada com base na altura do centro de gravidade.
+- **Visualização Interativa**: Uma interface web (usando p5.js) permite observar o comportamento dos robôs.
 
-## 🏗️ Project Structure
+## Estrutura do Projeto
 
 ```
 genetic_creature/
-├── creatures/           # Creature definitions (JSON)
-│   ├── dragon.json     # Dragon skeletal structure
-│   └── horse.json      # Horse skeletal structure
-├── shared/             # Shared models and physics
-│   ├── models/         # Common creature models
-│   └── physics/        # Physics engine components
-├── trainer/            # Genetic algorithm training
-│   ├── genetic/        # Genetic algorithm implementation
-│   ├── simulation/     # Creature simulation engine
-│   └── utils/          # Training utilities
-└── visualizer/         # Web-based visualization
-    ├── assets/         # Visual assets
-    ├── data/           # Training data
-    ├── js/             # JavaScript files
-    │   └── sketch.js   # p5.js visualization code
-    └── index.html      # Main visualization page
+├── creatures/           # Definições das criaturas (JSON)
+│   ├── dragon.json     # Estrutura do esqueleto do dragão
+│   └── horse.json      # Estrutura do esqueleto do cavalo
+├── shared/             # Código compartilhado
+│   ├── models/         # Modelos de criaturas
+│   └── physics/        # Motor de física
+├── trainer/            # Lógica de treinamento
+│   ├── genetic/        # Implementação do algoritmo genético
+│   ├── simulation/     # Motor de simulação da criatura
+│   └── utils/          # Utilitários de treinamento
+└── visualizer/         # Visualização baseada na web
+    ├── data/           # Dados do treinamento (criaturas salvas)
+    ├── js/             # Arquivos JavaScript
+    │   └── sketch.js   # Código de visualização com p5.js
+    └── index.html      # Página principal da visualização
 ```
 
-## 🚀 Getting Started
+## Como Executar
 
-### Prerequisites
+1.  **Instale as dependências**:
 
-- Modern web browser with JavaScript enabled
-- No additional dependencies required (uses CDN for p5.js)
+    ```bash
+    npm install
+    ```
 
-### Running the Visualizer
+2.  **Inicie o treinamento**:
 
-1. Clone or download this repository
-2. Open `visualizer/index.html` in your web browser
-3. The skeleton visualizer will load and display the creature structure
+    ```bash
+    npm run train
+    ```
 
-### Training New Creatures
+    Este comando inicia a simulação. Os robôs de cada geração são salvos no diretório `visualizer/data/`.
 
-1. Define your creature structure in JSON format (see `creatures/dragon.json` for reference)
-2. Configure genetic algorithm parameters in the trainer
-3. Run the training simulation
-4. Visualize the evolved walking patterns
+3.  **Visualize os resultados**:
 
-## 🧬 How It Works
+    ```bash
+    npm start
+    ```
 
-### Creature Definition
+    Abra seu navegador e acesse `http://localhost:3000`. Use o menu para selecionar a geração que deseja visualizar.
 
-Creatures are defined as hierarchical bone structures in JSON format:
+## Como Funciona
+
+### Definição da Criatura
+
+As criaturas são definidas como uma estrutura hierárquica de ossos em formato JSON. A estrutura define a conexão entre os ossos, seu comprimento e outras propriedades físicas:
+
+-   `angle`: O ângulo inicial do osso em relação ao seu osso "pai".
+-   `mov_angle`: O ângulo máximo (em graus) que o servo motor da junta pode se mover a partir da posição `angle`.
+-   `strength`: A força do motor da junta.
+-   `weight`: O peso do osso, usado para calcular o centro de gravidade.
 
 ```json
 {
@@ -66,85 +74,38 @@ Creatures are defined as hierarchical bone structures in JSON format:
       "id": "shoulders",
       "parent": null,
       "length": 0,
-      "angle": 0
+      "angle": 0,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     },
     {
       "id": "spine",
       "parent": "shoulders",
       "length": 50,
-      "angle": -110
+      "angle": -100,
+      "strength": 1.0,
+      "mov_angle": 0.0,
+      "weight": 1.0
     }
   ]
 }
 ```
 
-### Genetic Algorithm Process
+### Processo do Algoritmo Genético
 
-1. **Initialization**: Random walking patterns are generated
-2. **Simulation**: Each creature attempts to walk in a physics environment
-3. **Evaluation**: Fitness is calculated based on distance traveled and energy efficiency
-4. **Selection**: Best performers are selected for reproduction
-5. **Crossover**: Walking patterns are combined to create offspring
-6. **Mutation**: Random changes are introduced to maintain diversity
-7. **Iteration**: Process repeats until optimal walking patterns emerge
+O treinamento segue um processo evolutivo:
 
-### Visualization
+1.  **Inicialização**: Uma população de robôs é criada com redes neurais aleatórias.
+2.  **Simulação**: Cada robô é testado no ambiente de física, e seus movimentos são controlados pela sua rede neural.
+3.  **Avaliação**: A aptidão (fitness) é calculada com base na altura que o centro de gravidade da criatura alcança.
+4.  **Seleção**: Os indivíduos com melhor desempenho são selecionados para a próxima geração.
+5.  **Crossover (Recombinação)**: As redes neurais dos pais são combinadas para gerar descendentes, herdando características.
+6.  **Mutação**: Pequenas alterações aleatórias são introduzidas nas redes neurais dos descendentes para garantir a diversidade genética.
+7.  **Iteração**: O processo se repete por muitas gerações, resultando em robôs com comportamentos de movimento cada vez mais otimizados.
 
-The p5.js-based visualizer provides:
-- Real-time skeleton rendering
-- Joint and bone visualization
-- Color-coded joint types (root vs. child joints)
-- Interactive viewing angles
+## Próximos Passos e Melhorias
 
-## 🎯 Features
-
-- **Modular Design**: Easy to add new creature types
-- **Real-time Visualization**: Watch creatures evolve in real-time
-- **Physics Integration**: Realistic movement simulation
-- **Genetic Optimization**: Automatic walking pattern evolution
-- **Cross-platform**: Works in any modern web browser
-
-## 🔧 Customization
-
-### Adding New Creatures
-
-1. Create a new JSON file in the `creatures/` directory
-2. Define the bone structure following the existing format
-3. Update the visualizer to load your new creature
-
-### Modifying Genetic Parameters
-
-Adjust training parameters in the genetic algorithm to:
-- Change mutation rates
-- Modify selection pressure
-- Adjust population size
-- Fine-tune fitness functions
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to:
-- Add new creature types
-- Improve the genetic algorithm
-- Enhance the visualization
-- Optimize the physics simulation
-- Add new features
-
-## 📄 License
-
-This project is licensed under the Creative Commons Attribution 4.0 International License. See the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Inspired by Karl Sims' seminal work on evolved virtual creatures
-- Built with [p5.js](https://p5js.org/) for visualization
-- Genetic algorithm concepts from evolutionary computation research
-
-## 📚 Further Reading
-
-- [Evolved Virtual Creatures by Karl Sims](https://www.karlsims.com/evolved-virtual-creatures.html)
-- [Genetic Algorithms in Machine Learning](https://en.wikipedia.org/wiki/Genetic_algorithm)
-- [Physics-based Animation](https://en.wikipedia.org/wiki/Physics_animation)
-
----
-
-*Watch as digital creatures learn to walk through the power of evolution!* 🦕 
+- **Funções de Fitness Mais Complexas**: Implementar novas métricas, como distância percorrida ou estabilidade.
+- **Ambientes Dinâmicos**: Adicionar obstáculos ou terrenos irregulares.
+- **Interação do Usuário**: Permitir a aplicação de forças externas para testar a estabilidade dos robôs.

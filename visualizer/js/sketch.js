@@ -48,7 +48,7 @@ function onLoaded(raw) {
     currentCreature = Creature.fromJson(raw);
     bones = currentCreature.bones;
     initializeBonePositions();
-    redraw();              // força desenhar quando o JSON chegou
+    redraw();
 }
 
 function onError() {
@@ -81,16 +81,16 @@ function resetSimulation() {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.text())
-    .then(data => {
-        alert(data);
-        // Reload the page to reflect the new data
-        location.reload();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error resetting simulation');
-    });
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            // Reload the page to reflect the new data
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error resetting simulation');
+        });
 }
 
 function draw() {
