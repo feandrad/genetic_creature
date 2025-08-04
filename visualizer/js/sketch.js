@@ -28,11 +28,6 @@ function populateGenerationSelect(files) {
         generationSelect.option(`Generation ${generation}`, file);
     }
     generationSelect.changed(onGenerationChange);
-    generationSelect.option = 0;
-    // Load the first creature by default
-    if (files.length > 0) {
-        onGenerationChange()
-    }
 }
 
 function onGenerationChange() {
@@ -60,6 +55,10 @@ function setup() {
 
     resetButton = select('#reset-button');
     resetButton.mousePressed(resetSimulation);
+
+    if (generationSelect && generationSelect.elt.options.length > 0) {
+        onGenerationChange();
+    }
 }
 
 function windowResized() {
