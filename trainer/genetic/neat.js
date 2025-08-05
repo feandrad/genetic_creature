@@ -9,7 +9,7 @@ class NEAT {
         this.mutationRate = mutationRate;
         this.crossoverRate = crossoverRate;
         this.population = [];
-        this.simulator = new Simulator(500);
+        this.simulator = new Simulator(1000);
         this.inputNodes = 5; // Placeholder: CoG x, CoG y, root angle, root angular velocity, ground contact
         this.hiddenNodes = 10;
         this.outputNodes = 0; // Will be set based on creature bones

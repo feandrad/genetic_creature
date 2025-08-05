@@ -8,30 +8,54 @@ class Simulator {
     }
 
     simulate(creature) {
-        // Initialize positions based on bones
         const positions = {};
         const root = creature.bones.find(b => !b.parent);
         positions[root.id] = { x: 300, y: 300 };
         this.calculateInitialPositions(root, positions, creature.bones);
 
-        for (let i = 0; i < this.simulationSteps; i++) {
-            // Prepare inputs for the neural network
-            const inputs = this.prepareInputs(positions, creature.bones);
+        let lastStableStep = this.simulationSteps - 1; // fallback
 
-            // Get the neural network's output
+        for (let i = 0; i < this.simulationSteps; i++) {
+            const inputs = this.prepareInputs(positions, creature.bones);
             const outputs = creature.brain.feedForward(inputs);
 
-            // Apply the neural network's output to the bones
             for (let j = 0; j < outputs.length; j++) {
-                creature.bones[j].current_target_deviation = outputs[j] * 45; // Scale output to a reasonable angle
+                creature.bones[j].current_target_deviation = outputs[j] * 45;
             }
 
-            // Update physics
             this.physicsEngine.update(positions, creature.bones);
+
+            // verifica estabilidade
+            if (this._isStable(creature.bones)) {
+                lastStableStep = i; // guarda o último instante estável
+            }
         }
 
-        // Calculate and assign fitness
-        creature.fitness = this._calculateFitness(root, creature.bones, positions);
+        // Recalcula altura no último instante estável
+        const fitness = this._calculateFitnessAtStep(root, creature.bones, positions);
+        creature.fitness = fitness;
+    }
+
+    _isStable(bones) {
+        // Exemplo: considera estável se todas as juntas mudaram < 0.5° desde o último frame
+        return bones.every(bone => Math.abs(bone.mov_angle) < 0.5);
+    }
+
+    _calculateFitnessAtStep(root, bones, positions) {
+        let totalMass = 0;
+        let cogY = 0;
+        for (const bone of bones) {
+            const pos = positions[bone.id];
+            const mass = bone.weight || 1.0;
+            cogY += pos.y * mass;
+            totalMass += mass;
+        }
+        if (totalMass > 0) cogY /= totalMass;
+
+        let cogFitness = Math.max(0, this.physicsEngine.groundY - cogY);
+        let rootFitness = Math.max(0, this.physicsEngine.groundY - positions[root.id].y);
+
+        return cogFitness * 0.7 + rootFitness * 0.3;
     }
 
     _calculateFitness(root, bones, positions) {
