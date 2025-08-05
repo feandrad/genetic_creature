@@ -1,14 +1,13 @@
 
 class Creature {
-    constructor(bones, brain = null) {
+    constructor(bones, fitness, brain) {
         this.bones = bones;
-        this.fitness = 0;
-        this.brain = brain; // Neural network for controlling the creature
+        this.fitness = fitness;
+        this.brain = brain;
     }
 
     static fromJson(json) {
-        const creature = new Creature(json.bones, null);
-        creature.fitness = json.fitness || 0;
+        const creature = new Creature(json.bones, json.fitness || 0);
         if (json.brain) {
             const brain = new NeuralNetwork(json.brain.inputNodes, json.brain.hiddenNodes, json.brain.outputNodes);
             brain.weights_ih = json.brain.weights_ih;
@@ -41,7 +40,7 @@ class Creature {
     clone() {
         const clonedBones = JSON.parse(JSON.stringify(this.bones));
         const clonedBrain = this.brain ? this.brain.clone() : null;
-        return new Creature(clonedBones, clonedBrain);
+        return new Creature(clonedBones, this.fitness, clonedBrain);
     }
 }
 

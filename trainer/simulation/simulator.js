@@ -30,9 +30,53 @@ class Simulator {
             this.physicsEngine.update(positions, creature.bones);
         }
 
-        // Calculate fitness
-        const finalX = positions[root.id].x;
-        creature.fitness = Math.max(0, finalX - 300);
+        // Calculate and assign fitness
+        creature.fitness = this._calculateFitness(root, creature.bones, positions);
+    }
+
+    _calculateFitness(root, bones, positions) {
+        // Calculate final center of gravity (CoG)
+        let totalMass = 0;
+        let cogY = 0;
+        for (const bone of bones) {
+            const pos = positions[bone.id];
+            const mass = bone.weight || 1.0;
+
+            if (pos === undefined) {
+                console.warn(`[Simulator] WARNING: Position for bone ID ${bone.id} is undefined. This bone will not contribute to CoG calculation.`);
+                continue; // Skip this bone if its position is undefined
+            }
+
+            if (isNaN(pos.y)) {
+                console.warn(`[Simulator] WARNING: pos.y for bone ID ${bone.id} is NaN. Skipping this bone for CoG calculation.`);
+                continue; // Skip this bone if pos.y is NaN
+            }
+
+            cogY += pos.y * mass;
+            totalMass += mass;
+        }
+
+        if (totalMass > 0) {
+            cogY /= totalMass;
+        } else {
+            console.warn(`[Simulator] WARNING: totalMass is 0. Falling back to groundY for cogY.`);
+            // Fallback to root position if totalMass is 0
+            cogY = this.physicsEngine.groundY;
+        }
+
+        if (isNaN(cogY)) {
+            console.error(`[Simulator] ERROR: cogY is NaN after calculation. totalMass: ${totalMass}, bones processed: ${bones.length}`);
+            // Handle this case, perhaps return a very low fitness or throw an error
+            return 0; 
+        }
+
+        // Fitness is based solely on the final height of the CoG from the ground.
+        // A smaller Y value means higher, as Y increases downwards. groundY is 500.
+        let cogFitness = Math.max(0, this.physicsEngine.groundY - cogY);
+        let rootFitness = Math.max(0, this.physicsEngine.groundY - positions[root.id].y);
+
+        // console.log("Fitness found: ", cogFitness, rootFitness);
+        return cogFitness * 0.7 + rootFitness * 0.3;
     }
 
     prepareInputs(positions, bones) {
@@ -67,22 +111,41 @@ class Simulator {
         return inputs;
     }
 
-    calculateInitialPositions(bone, positions, bones, parentAngle = 0) {
-        // Calculate the global angle for the current bone
-        const globalAngle = (bone.angle || 0) + parentAngle;
-        bone.initialAngle = globalAngle; // Store the global angle
+    calculateInitialPositions(root, positions, bones) {
+        const angles = {};
+        const boneMap = Object.fromEntries(bones.map(b => [b.id, b]));
 
-        const parentPos = positions[bone.id];
-        const children = bones.filter(b => b.parent === bone.id);
+        // Set the root bone's initial angle
+        angles[root.id] = root.angle || 0;
+        root.initialAngle = root.angle || 0;
 
-        children.forEach(child => {
-            const angleRad = this.physicsEngine._toRadians(globalAngle + (child.angle || 0));
-            const x = parentPos.x + Math.sin(angleRad) * child.length;
-            const y = parentPos.y + Math.cos(angleRad) * child.length;
-            positions[child.id] = { x, y };
-            // Recursively call for children, passing the current bone's global angle
-            this.calculateInitialPositions(child, positions, bones, globalAngle);
-        });
+        // Function to compute position recursively, adapted from visualizer
+        function computePos(id) {
+            const bone = boneMap[id];
+            const parentId = bone.parent;
+            const parentPos = positions[parentId];
+            const parentAngle = angles[parentId] || 0;
+
+            const angle = (bone.angle || 0) + parentAngle;
+            angles[id] = angle;
+            bone.initialAngle = angle; // Store the calculated global angle
+
+            const len = bone.length || 0;
+            const angleRad = this.physicsEngine._toRadians(angle);
+            const dx = Math.sin(angleRad) * len;
+            const dy = Math.cos(angleRad) * len; // Corrected: Use positive cos for dy as Y points down
+
+            positions[id] = { x: parentPos.x + dx, y: parentPos.y + dy };
+        }
+
+        // Iteratively calculate positions to handle dependencies
+        for (let i = 0; i < bones.length * 2; i++) {
+            bones.forEach(b => {
+                if (b.parent && positions[b.parent] && !positions[b.id]) {
+                    computePos.call(this, b.id);
+                }
+            });
+        }
     }
 }
 

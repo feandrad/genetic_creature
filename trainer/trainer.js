@@ -14,15 +14,15 @@ class Trainer {
         this.neat.init(initialCreature);
 
         for (let i = 0; i < generations; i++) {
-            console.log(`[Trainer] Evolving generation ${i + 1}/${generations}...`);
-            this.neat.evolve();
-            this.saveBestCreature(i);
+            console.log(`[Trainer] Evaluating generation ${i}/${generations}...`);
+            let best = this.neat.evaluateFitness();
+            this.saveCreature(best, i);
+            this.neat.breedNewGeneration();
         }
         this.saveCreatureList(generations);
     }
 
-    saveBestCreature(generation) {
-        const bestCreature = this.neat.population[0];
+    saveCreature(bestCreature, generation) {
         const creatureJson = bestCreature.toJson();
         const fs = require('fs');
         const filePath = path.resolve(__dirname, `../visualizer/data/creature_${generation}.json`);
@@ -41,8 +41,3 @@ class Trainer {
 }
 
 module.exports = Trainer;
-
-// Example usage:
-// const trainer = new Trainer(100, 0.01, 0.8);
-// const initialCreature = require('../../creatures/dragon.json');
-// trainer.start(initialCreature);
