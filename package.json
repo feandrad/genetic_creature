@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "train": "node trainer/run.js"
+  },
   "dependencies": {
     "express": "^5.1.0"
   }
