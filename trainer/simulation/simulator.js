@@ -4,7 +4,7 @@ const PhysicsEngine = require('../../shared/physics/engine.js');
 class Simulator {
     constructor(simulationSteps) {
         this.simulationSteps = simulationSteps;
-        this.physicsEngine = new PhysicsEngine(0.1, 500);
+        this.physicsEngine = new PhysicsEngine(6, 500);
     }
 
     simulate(creature) {
